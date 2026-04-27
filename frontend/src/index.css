@@ -47,6 +47,24 @@ body {
 button {
   font-family: inherit;
   cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+button:hover:not(:disabled),
+.btn-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+}
+
+button:active:not(:disabled),
+.btn-link:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-link {
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  display: inline-block;
 }
 
 input[type="file"] {

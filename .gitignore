@@ -3,6 +3,10 @@
 .env.*
 !.env.example
 
+# User data (generated at runtime, never commit)
+backend/users.json
+backend/reports.json
+
 # Node modules
 node_modules/
 */node_modules/
