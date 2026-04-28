@@ -67,6 +67,14 @@ button:active:not(:disabled),
   display: inline-block;
 }
 
+.nav-tab {
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.nav-tab:hover {
+  color: white !important;
+  background: rgba(37, 99, 235, 0.2) !important;
+}
+
 input[type="file"] {
   display: none;
 }

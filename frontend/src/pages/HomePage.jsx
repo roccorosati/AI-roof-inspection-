@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import MarketingNav from '../components/MarketingNav.jsx';
 
 const features = [
   {
@@ -42,38 +43,7 @@ export default function HomePage() {
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
 
-      {/* Nav */}
-      <nav style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-        position: 'sticky', top: 0, zIndex: 100,
-      }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{
-              width: 44, height: 44,
-              background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 22, flexShrink: 0,
-            }}>🏠</div>
-            <div>
-              <div style={{ color: 'white', fontSize: 18, fontWeight: 700, letterSpacing: '-0.3px' }}>AI Roof Inspector</div>
-              <div style={{ color: '#94a3b8', fontSize: 11, marginTop: 1 }}>Professional inspection reports</div>
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <Link to="/signup" className="btn-link" style={{
-              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.25)',
-              color: 'white', textDecoration: 'none', padding: '9px 20px', fontSize: 14, fontWeight: 600,
-            }}>Sign Up</Link>
-            <Link to="/login" className="btn-link" style={{
-              background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
-              color: 'white', textDecoration: 'none', padding: '9px 22px', fontSize: 14, fontWeight: 600,
-              boxShadow: '0 2px 8px rgba(37,99,235,0.4)',
-            }}>Sign In</Link>
-          </div>
-        </div>
-      </nav>
+      <MarketingNav />
 
       {/* Hero — house photo background */}
       <section style={{ position: 'relative', padding: '110px 24px 90px', textAlign: 'center', overflow: 'hidden' }}>
@@ -92,7 +62,7 @@ export default function HomePage() {
             background: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.4)',
             color: '#93c5fd', padding: '6px 18px',
             fontSize: 13, fontWeight: 600, marginBottom: 28, letterSpacing: '0.3px',
-          }}>Powered by Claude AI</div>
+          }}>AI-Powered · Fast · Professional</div>
           <h1 style={{ color: 'white', fontSize: 52, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-1.5px', marginBottom: 24 }}>
             Professional Roof<br /><span style={{ color: '#60a5fa' }}>Inspection Reports</span>
           </h1>
@@ -268,7 +238,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer style={{ background: '#0f172a', padding: '28px 24px', textAlign: 'center', color: '#475569', fontSize: 13 }}>
-        <div style={{ marginBottom: 6, color: '#64748b' }}>AI Roof Inspector — Powered by Claude AI</div>
+        <div style={{ marginBottom: 6, color: '#64748b' }}>AI Roof Inspector</div>
         <div style={{ color: '#334155', fontSize: 12 }}>For professional use only · All reports should be verified by a licensed inspector</div>
       </footer>
     </div>
