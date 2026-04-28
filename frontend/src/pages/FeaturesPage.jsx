@@ -46,11 +46,17 @@ export default function FeaturesPage() {
       <MarketingNav />
 
       {/* Hero */}
-      <section style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)',
-        padding: '72px 24px 80px', textAlign: 'center',
-      }}>
-        <div style={{ maxWidth: 680, margin: '0 auto' }}>
+      <section style={{ position: 'relative', padding: '90px 24px 96px', textAlign: 'center', overflow: 'hidden' }}>
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'url(/images/top-down-roof.jpg)',
+          backgroundSize: 'cover', backgroundPosition: 'center',
+        }} />
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(160deg, rgba(15,23,42,0.91) 0%, rgba(30,58,95,0.85) 55%, rgba(30,64,175,0.82) 100%)',
+        }} />
+        <div style={{ position: 'relative', maxWidth: 680, margin: '0 auto' }}>
           <div style={{
             display: 'inline-block',
             background: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.4)',
@@ -60,7 +66,7 @@ export default function FeaturesPage() {
           <h1 style={{ color: 'white', fontSize: 46, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-1.2px', marginBottom: 18 }}>
             Built for the field.<br /><span style={{ color: '#60a5fa' }}>Ready to submit.</span>
           </h1>
-          <p style={{ color: '#94a3b8', fontSize: 17, lineHeight: 1.7 }}>
+          <p style={{ color: '#cbd5e1', fontSize: 17, lineHeight: 1.7 }}>
             Every feature in AI Roof Inspector was designed around one question: what does a professional need to close a job faster?
           </p>
         </div>
@@ -99,6 +105,48 @@ export default function FeaturesPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Before / After Visual */}
+      <section style={{ background: '#0f172a', padding: '80px 24px' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <h2 style={{ color: 'white', fontSize: 32, fontWeight: 800, letterSpacing: '-0.7px', marginBottom: 12 }}>
+              The old way vs. the new way
+            </h2>
+            <p style={{ color: '#94a3b8', fontSize: 15, maxWidth: 480, margin: '0 auto' }}>
+              Inspectors used to spend hours writing up what took 30 seconds to photograph.
+            </p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 4 }}>
+            <div style={{ position: 'relative', overflow: 'hidden' }}>
+              <img src="/images/inspector-writing-report.jpg" alt="Inspector writing report by hand"
+                style={{ width: '100%', height: 320, objectFit: 'cover', display: 'block', filter: 'grayscale(30%)' }} />
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: 'linear-gradient(to top, rgba(15,23,42,0.85) 0%, rgba(15,23,42,0.2) 60%)',
+              }} />
+              <div style={{ position: 'absolute', top: 16, left: 16, background: 'rgba(239,68,68,0.85)', color: 'white', fontSize: 11, fontWeight: 700, padding: '4px 12px', letterSpacing: '0.5px' }}>BEFORE</div>
+              <div style={{ position: 'absolute', bottom: 24, left: 24, right: 24 }}>
+                <div style={{ color: 'white', fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Hours of manual write-up</div>
+                <div style={{ color: '#94a3b8', fontSize: 13 }}>Clipboard notes → typed report → formatted PDF</div>
+              </div>
+            </div>
+            <div style={{ position: 'relative', overflow: 'hidden' }}>
+              <img src="/images/damaged-roof.jpg" alt="Damaged roof ready for AI analysis"
+                style={{ width: '100%', height: 320, objectFit: 'cover', display: 'block' }} />
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: 'linear-gradient(to top, rgba(15,23,42,0.85) 0%, rgba(15,23,42,0.2) 60%)',
+              }} />
+              <div style={{ position: 'absolute', top: 16, left: 16, background: 'rgba(37,99,235,0.9)', color: 'white', fontSize: 11, fontWeight: 700, padding: '4px 12px', letterSpacing: '0.5px' }}>AFTER</div>
+              <div style={{ position: 'absolute', bottom: 24, left: 24, right: 24 }}>
+                <div style={{ color: 'white', fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Upload photos, get a full report</div>
+                <div style={{ color: '#93c5fd', fontSize: 13 }}>Complete 11-section report in under 30 seconds</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

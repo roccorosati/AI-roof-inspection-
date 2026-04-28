@@ -27,15 +27,26 @@ export default function ContactPage() {
       setError('Please fill in all required fields.');
       return;
     }
-    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
-    if (!emailValid) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       setError('Please enter a valid email address.');
       return;
     }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 900));
-    setLoading(false);
-    setSubmitted(true);
+    setError('');
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send message.');
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   const inputStyle = {
@@ -56,15 +67,21 @@ export default function ContactPage() {
       <MarketingNav />
 
       {/* Hero */}
-      <section style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)',
-        padding: '64px 24px 72px', textAlign: 'center',
-      }}>
-        <div style={{ maxWidth: 600, margin: '0 auto' }}>
+      <section style={{ position: 'relative', padding: '80px 24px 88px', textAlign: 'center', overflow: 'hidden' }}>
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'url(/images/drone-roof.jpg)',
+          backgroundSize: 'cover', backgroundPosition: 'center 36%',
+        }} />
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(160deg, rgba(15,23,42,0.90) 0%, rgba(30,58,95,0.84) 55%, rgba(30,64,175,0.80) 100%)',
+        }} />
+        <div style={{ position: 'relative', maxWidth: 600, margin: '0 auto' }}>
           <h1 style={{ color: 'white', fontSize: 44, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-1.2px', marginBottom: 16 }}>
             Get in touch
           </h1>
-          <p style={{ color: '#94a3b8', fontSize: 17, lineHeight: 1.7 }}>
+          <p style={{ color: '#cbd5e1', fontSize: 17, lineHeight: 1.7 }}>
             Have a question, a feature request, or just want to say hi? We'd love to hear from you.
           </p>
         </div>

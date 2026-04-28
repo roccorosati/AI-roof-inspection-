@@ -37,15 +37,21 @@ export default function AboutPage() {
       <MarketingNav />
 
       {/* Hero */}
-      <section style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)',
-        padding: '72px 24px 80px', textAlign: 'center',
-      }}>
-        <div style={{ maxWidth: 680, margin: '0 auto' }}>
+      <section style={{ position: 'relative', padding: '90px 24px 96px', textAlign: 'center', overflow: 'hidden' }}>
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'url(/images/blue-house-roof.jpg)',
+          backgroundSize: 'cover', backgroundPosition: 'center 30%',
+        }} />
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(160deg, rgba(15,23,42,0.88) 0%, rgba(30,58,95,0.82) 55%, rgba(30,64,175,0.78) 100%)',
+        }} />
+        <div style={{ position: 'relative', maxWidth: 680, margin: '0 auto' }}>
           <h1 style={{ color: 'white', fontSize: 46, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-1.2px', marginBottom: 20 }}>
             Why we built<br /><span style={{ color: '#60a5fa' }}>AI Roof Inspector</span>
           </h1>
-          <p style={{ color: '#94a3b8', fontSize: 17, lineHeight: 1.75 }}>
+          <p style={{ color: '#cbd5e1', fontSize: 17, lineHeight: 1.75 }}>
             Writing inspection reports is one of the most time-consuming parts of a roofing inspector's job.
             We set out to change that — without cutting corners on quality.
           </p>
@@ -54,38 +60,57 @@ export default function AboutPage() {
 
       {/* Story */}
       <section style={{ padding: '72px 24px', background: 'white' }}>
-        <div style={{ maxWidth: 780, margin: '0 auto' }}>
-          <h2 style={{ fontSize: 30, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.6px', marginBottom: 24 }}>Our story</h2>
-          <p style={{ color: '#475569', fontSize: 16, lineHeight: 1.85, marginBottom: 20 }}>
-            AI Roof Inspector started with a simple observation: professional inspectors spend hours writing reports
-            that could be generated in seconds with the right technology. Between the field work, the photo sorting,
-            the damage cataloging, and the final report formatting — most of the effort after the inspection was
-            repetitive and manual.
-          </p>
-          <p style={{ color: '#475569', fontSize: 16, lineHeight: 1.85, marginBottom: 20 }}>
-            We combined modern AI image analysis with a structured, insurance-ready report format to create something
-            inspectors can actually use on the job — not a toy, not a proof of concept. Upload your photos, get a
-            complete report. That's the whole product.
-          </p>
-          <p style={{ color: '#475569', fontSize: 16, lineHeight: 1.85 }}>
-            We're a small team that believes the best software tools are the ones that get out of your way. If AI
-            Roof Inspector saves you an hour on every job, it's doing its job.
-          </p>
+        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 56, alignItems: 'center' }}>
+          <div style={{ flex: '1 1 340px', position: 'relative' }}>
+            <div style={{
+              position: 'absolute', inset: -4,
+              background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+              zIndex: 0,
+            }} />
+            <img src="/images/person-on-ladder.jpg" alt="Inspector climbing to a roof"
+              style={{ position: 'relative', zIndex: 1, width: '100%', display: 'block', objectFit: 'cover', maxHeight: 420 }} />
+          </div>
+          <div style={{ flex: '1 1 360px' }}>
+            <h2 style={{ fontSize: 30, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.6px', marginBottom: 24 }}>Our story</h2>
+            <p style={{ color: '#475569', fontSize: 16, lineHeight: 1.85, marginBottom: 20 }}>
+              AI Roof Inspector started with a simple observation: professional inspectors spend hours writing reports
+              that could be generated in seconds with the right technology. Between the field work, the photo sorting,
+              the damage cataloging, and the final report formatting — most of the effort after the inspection was
+              repetitive and manual.
+            </p>
+            <p style={{ color: '#475569', fontSize: 16, lineHeight: 1.85, marginBottom: 20 }}>
+              We combined modern AI image analysis with a structured, insurance-ready report format to create something
+              inspectors can actually use on the job — not a toy, not a proof of concept. Upload your photos, get a
+              complete report. That's the whole product.
+            </p>
+            <p style={{ color: '#475569', fontSize: 16, lineHeight: 1.85 }}>
+              We're a small team that believes the best software tools are the ones that get out of your way. If AI
+              Roof Inspector saves you an hour on every job, it's doing its job.
+            </p>
+          </div>
         </div>
       </section>
 
       {/* Stats */}
-      <section style={{ padding: '56px 24px', background: '#f8fafc' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+      <section style={{ position: 'relative', padding: '64px 24px', overflow: 'hidden' }}>
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'url(/images/aerial-neighborhood.jpg)',
+          backgroundSize: 'cover', backgroundPosition: 'center',
+        }} />
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'rgba(15,23,42,0.82)',
+        }} />
+        <div style={{ position: 'relative', maxWidth: 900, margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 24 }}>
             {stats.map(({ value, label }) => (
               <div key={label} style={{
-                background: 'white', border: '1px solid #e2e8f0',
+                background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)',
                 padding: '32px 24px', textAlign: 'center',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
               }}>
-                <div style={{ color: '#2563eb', fontSize: 36, fontWeight: 800, letterSpacing: '-1px', marginBottom: 8 }}>{value}</div>
-                <div style={{ color: '#64748b', fontSize: 13 }}>{label}</div>
+                <div style={{ color: '#60a5fa', fontSize: 36, fontWeight: 800, letterSpacing: '-1px', marginBottom: 8 }}>{value}</div>
+                <div style={{ color: '#94a3b8', fontSize: 13 }}>{label}</div>
               </div>
             ))}
           </div>

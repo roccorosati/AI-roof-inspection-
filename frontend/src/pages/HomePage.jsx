@@ -45,11 +45,11 @@ export default function HomePage() {
 
       <MarketingNav />
 
-      {/* Hero — house photo background */}
+      {/* Hero */}
       <section style={{ position: 'relative', padding: '110px 24px 90px', textAlign: 'center', overflow: 'hidden' }}>
         <div style={{
           position: 'absolute', inset: 0,
-          backgroundImage: 'url(/images/house-hero.jpg)',
+          backgroundImage: 'url(/images/storm-above-house.jpg)',
           backgroundSize: 'cover', backgroundPosition: 'center 40%',
         }} />
         <div style={{
@@ -57,12 +57,6 @@ export default function HomePage() {
           background: 'linear-gradient(160deg, rgba(15,23,42,0.90) 0%, rgba(30,58,95,0.84) 55%, rgba(30,64,175,0.80) 100%)',
         }} />
         <div style={{ position: 'relative', maxWidth: 760, margin: '0 auto' }}>
-          <div style={{
-            display: 'inline-block',
-            background: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.4)',
-            color: '#93c5fd', padding: '6px 18px',
-            fontSize: 13, fontWeight: 600, marginBottom: 28, letterSpacing: '0.3px',
-          }}>AI-Powered · Fast · Professional</div>
           <h1 style={{ color: 'white', fontSize: 52, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-1.5px', marginBottom: 24 }}>
             Professional Roof<br /><span style={{ color: '#60a5fa' }}>Inspection Reports</span>
           </h1>
@@ -135,7 +129,7 @@ export default function HomePage() {
               zIndex: 0,
             }} />
             <img
-              src="/images/hail-damage-marked.png"
+              src="/images/hail-damage-marked-2.png"
               alt="AI-detected hail damage with circled impact marks"
               style={{ position: 'relative', zIndex: 1, width: '100%', display: 'block' }}
             />
@@ -179,31 +173,81 @@ export default function HomePage() {
 
       {/* How It Works */}
       <section id="how-it-works" style={{ background: 'white', padding: '80px 24px' }}>
-        <div style={{ maxWidth: 860, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 56 }}>
-            <h2 style={{ fontSize: 36, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.8px', marginBottom: 12 }}>How it works</h2>
-            <p style={{ color: '#64748b', fontSize: 16 }}>From photos to a professional report in three steps.</p>
+        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 60, alignItems: 'center' }}>
+          <div style={{ flex: '1 1 340px' }}>
+            <div style={{ marginBottom: 48 }}>
+              <h2 style={{ fontSize: 36, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.8px', marginBottom: 12 }}>How it works</h2>
+              <p style={{ color: '#64748b', fontSize: 16 }}>From photos to a professional report in three steps.</p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {steps.map(({ number, title, desc }, i) => (
+                <div key={number} style={{ display: 'flex', gap: 32, alignItems: 'flex-start', marginBottom: i < steps.length - 1 ? 40 : 0 }}>
+                  <div style={{ flexShrink: 0, textAlign: 'center' }}>
+                    <div style={{
+                      width: 56, height: 56,
+                      background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: 'white', fontSize: 18, fontWeight: 800,
+                    }}>{number}</div>
+                    {i < steps.length - 1 && (
+                      <div style={{ width: 2, height: 40, background: '#e2e8f0', margin: '8px auto 0' }} />
+                    )}
+                  </div>
+                  <div style={{ paddingTop: 12 }}>
+                    <h3 style={{ fontSize: 19, fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>{title}</h3>
+                    <p style={{ color: '#64748b', fontSize: 15, lineHeight: 1.6 }}>{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {steps.map(({ number, title, desc }, i) => (
-              <div key={number} style={{ display: 'flex', gap: 32, alignItems: 'flex-start', marginBottom: i < steps.length - 1 ? 40 : 0 }}>
-                <div style={{ flexShrink: 0, textAlign: 'center' }}>
-                  <div style={{
-                    width: 56, height: 56,
-                    background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: 'white', fontSize: 18, fontWeight: 800,
-                  }}>{number}</div>
-                  {i < steps.length - 1 && (
-                    <div style={{ width: 2, height: 40, background: '#e2e8f0', margin: '8px auto 0' }} />
-                  )}
-                </div>
-                <div style={{ paddingTop: 12 }}>
-                  <h3 style={{ fontSize: 19, fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>{title}</h3>
-                  <p style={{ color: '#64748b', fontSize: 15, lineHeight: 1.6 }}>{desc}</p>
-                </div>
-              </div>
-            ))}
+          <div style={{ flex: '1 1 380px', position: 'relative' }}>
+            <div style={{
+              position: 'absolute', inset: -4,
+              background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+              zIndex: 0,
+            }} />
+            <img
+              src="/images/drone.jpg"
+              alt="Drone capturing roof photos for inspection"
+              style={{ position: 'relative', zIndex: 1, width: '100%', display: 'block', objectFit: 'cover', maxHeight: 340 }}
+            />
+            <div style={{
+              position: 'absolute', bottom: 16, left: 16, zIndex: 2,
+              background: 'rgba(15,23,42,0.88)', border: '1px solid rgba(59,130,246,0.5)',
+              color: '#93c5fd', fontSize: 12, fontWeight: 700,
+              padding: '6px 14px', letterSpacing: '0.4px',
+            }}>
+              CAPTURE FROM ANY ANGLE
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Photo Strip */}
+      <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: 300 }}>
+        <div style={{ position: 'relative', overflow: 'hidden' }}>
+          <img src="/images/person-on-ladder.jpg" alt="Inspector climbing to roof"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(to top, rgba(15,23,42,0.75) 0%, transparent 60%)',
+          }} />
+          <div style={{ position: 'absolute', bottom: 24, left: 24 }}>
+            <div style={{ color: 'white', fontSize: 18, fontWeight: 700, marginBottom: 4 }}>On-site in minutes</div>
+            <div style={{ color: '#cbd5e1', fontSize: 13 }}>Inspectors use phones, drones, or both</div>
+          </div>
+        </div>
+        <div style={{ position: 'relative', overflow: 'hidden' }}>
+          <img src="/images/aerial-neighborhood.jpg" alt="Aerial view of neighborhood rooftops"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(to top, rgba(15,23,42,0.75) 0%, transparent 60%)',
+          }} />
+          <div style={{ position: 'absolute', bottom: 24, left: 24 }}>
+            <div style={{ color: 'white', fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Built for scale</div>
+            <div style={{ color: '#cbd5e1', fontSize: 13 }}>Handle more jobs without more overhead</div>
           </div>
         </div>
       </section>

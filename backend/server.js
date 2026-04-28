@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import Anthropic from '@anthropic-ai/sdk';
+import nodemailer from 'nodemailer';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
@@ -449,6 +450,71 @@ app.post('/api/analyze', requireAuth, analyzeLimiter, upload.array('images', 10)
   } catch (err) {
     console.error('Analysis error:', err);
     res.status(500).json({ error: err.message || 'Failed to analyze images' });
+  }
+});
+
+// ── Contact endpoint ──────────────────────────────────────────────────────────
+
+const contactLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { error: 'Too many messages sent. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.post('/api/contact', contactLimiter, async (req, res) => {
+  try {
+    const { name, email, subject, message } = req.body;
+
+    if (!name || !email || !message)
+      return res.status(400).json({ error: 'Name, email, and message are required.' });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      return res.status(400).json({ error: 'Invalid email address.' });
+
+    const safeName    = sanitizeInput(name);
+    const safeEmail   = sanitizeInput(email);
+    const safeSubject = sanitizeInput(subject || 'General question');
+    const safeMessage = String(message || '').replace(/[<>]/g, '').trim().slice(0, 2000);
+
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.warn('Contact form: SMTP_USER/SMTP_PASS not set — email not sent.');
+      return res.json({ success: true });
+    }
+
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      family: 4,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+      tls: { rejectUnauthorized: false },
+    });
+
+    const recipient = process.env.CONTACT_RECIPIENT || process.env.SMTP_USER;
+
+    await transporter.sendMail({
+      from: `"AI Roof Inspector" <${process.env.SMTP_USER}>`,
+      to: recipient,
+      replyTo: safeEmail,
+      subject: `[Contact Form] ${safeSubject}`,
+      text: `Name: ${safeName}\nEmail: ${safeEmail}\nSubject: ${safeSubject}\n\n${safeMessage}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+          <h2 style="color:#0f172a">New Contact Form Submission</h2>
+          <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+            <tr><td style="padding:8px 0;color:#64748b;width:80px">Name</td><td style="padding:8px 0;font-weight:600">${safeName}</td></tr>
+            <tr><td style="padding:8px 0;color:#64748b">Email</td><td style="padding:8px 0"><a href="mailto:${safeEmail}">${safeEmail}</a></td></tr>
+            <tr><td style="padding:8px 0;color:#64748b">Subject</td><td style="padding:8px 0">${safeSubject}</td></tr>
+          </table>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:20px;white-space:pre-wrap">${safeMessage}</div>
+        </div>`,
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Contact form error:', err);
+    res.status(500).json({ error: 'Failed to send message. Please try again.' });
   }
 });
 
