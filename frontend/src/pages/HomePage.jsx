@@ -50,11 +50,11 @@ export default function HomePage() {
         <div style={{
           position: 'absolute', inset: 0,
           backgroundImage: 'url(/images/storm-above-house.jpg)',
-          backgroundSize: 'cover', backgroundPosition: 'center 40%',
+          backgroundSize: 'cover', backgroundPosition: 'center 90%',
         }} />
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(160deg, rgba(15,23,42,0.90) 0%, rgba(30,58,95,0.84) 55%, rgba(30,64,175,0.80) 100%)',
+          background: 'linear-gradient(160deg, rgba(15,23,42,0.72) 0%, rgba(30,58,95,0.62) 55%, rgba(30,64,175,0.58) 100%)',
         }} />
         <div style={{ position: 'relative', maxWidth: 760, margin: '0 auto' }}>
           <h1 style={{ color: 'white', fontSize: 52, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-1.5px', marginBottom: 24 }}>
