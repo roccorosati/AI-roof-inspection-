@@ -54,7 +54,7 @@ export default function HomePage() {
         }} />
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(160deg, rgba(15,23,42,0.72) 0%, rgba(30,58,95,0.62) 55%, rgba(30,64,175,0.58) 100%)',
+          background: 'linear-gradient(160deg, rgba(15,23,42,0.52) 0%, rgba(30,58,95,0.44) 55%, rgba(30,64,175,0.40) 100%)',
         }} />
         <div style={{ position: 'relative', maxWidth: 760, margin: '0 auto' }}>
           <h1 style={{ color: 'white', fontSize: 52, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-1.5px', marginBottom: 24 }}>
@@ -224,30 +224,38 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Photo Strip */}
-      <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: 300 }}>
-        <div style={{ position: 'relative', overflow: 'hidden' }}>
-          <img src="/images/person-on-ladder.jpg" alt="Inspector climbing to roof"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(to top, rgba(15,23,42,0.75) 0%, transparent 60%)',
-          }} />
-          <div style={{ position: 'absolute', bottom: 24, left: 24 }}>
-            <div style={{ color: 'white', fontSize: 18, fontWeight: 700, marginBottom: 4 }}>On-site in minutes</div>
-            <div style={{ color: '#cbd5e1', fontSize: 13 }}>Inspectors use phones, drones, or both</div>
+      {/* Safety vs. Drone Section */}
+      <section style={{ background: '#0f172a', padding: '64px 24px' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <h2 style={{ color: 'white', fontSize: 32, fontWeight: 800, letterSpacing: '-0.7px', marginBottom: 12 }}>
+              There's a safer way to inspect a roof.
+            </h2>
+            <p style={{ color: '#94a3b8', fontSize: 16, maxWidth: 520, margin: '0 auto' }}>
+              Every roof climb is a fall risk. Drones keep inspectors on the ground — and still get the job done faster.
+            </p>
           </div>
-        </div>
-        <div style={{ position: 'relative', overflow: 'hidden' }}>
-          <img src="/images/aerial-neighborhood.jpg" alt="Aerial view of neighborhood rooftops"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(to top, rgba(15,23,42,0.75) 0%, transparent 60%)',
-          }} />
-          <div style={{ position: 'absolute', bottom: 24, left: 24 }}>
-            <div style={{ color: 'white', fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Built for scale</div>
-            <div style={{ color: '#cbd5e1', fontSize: 13 }}>Handle more jobs without more overhead</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 4 }}>
+            <div style={{ position: 'relative', overflow: 'hidden', height: 340 }}>
+              <img src="/images/person-on-ladder.jpg" alt="Inspectors working on a roof"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block', filter: 'grayscale(20%)' }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,23,42,0.88) 0%, rgba(15,23,42,0.3) 55%, transparent 100%)' }} />
+              <div style={{ position: 'absolute', top: 20, left: 20, background: 'rgba(239,68,68,0.9)', color: 'white', fontSize: 11, fontWeight: 800, padding: '5px 14px', letterSpacing: '1px' }}>THE OLD WAY</div>
+              <div style={{ position: 'absolute', bottom: 28, left: 24, right: 24 }}>
+                <div style={{ color: 'white', fontSize: 22, fontWeight: 800, marginBottom: 8, lineHeight: 1.2 }}>Climbing roofs is dangerous.</div>
+                <div style={{ color: '#fca5a5', fontSize: 15, lineHeight: 1.6 }}>Falls are the #1 cause of fatal injuries in construction. Every manual inspection puts the inspector at risk.</div>
+              </div>
+            </div>
+            <div style={{ position: 'relative', overflow: 'hidden', height: 340 }}>
+              <img src="/images/aerial-neighborhood.jpg" alt="Aerial drone view of neighborhood"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transform: 'scale(1.5)', transformOrigin: 'center center' }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,23,42,0.88) 0%, rgba(15,23,42,0.3) 55%, transparent 100%)' }} />
+              <div style={{ position: 'absolute', top: 20, left: 20, background: 'rgba(37,99,235,0.9)', color: 'white', fontSize: 11, fontWeight: 800, padding: '5px 14px', letterSpacing: '1px' }}>THE NEW WAY</div>
+              <div style={{ position: 'absolute', bottom: 28, left: 24, right: 24 }}>
+                <div style={{ color: 'white', fontSize: 22, fontWeight: 800, marginBottom: 8, lineHeight: 1.2 }}>Stay on the ground. Cover more ground.</div>
+                <div style={{ color: '#93c5fd', fontSize: 15, lineHeight: 1.6 }}>A drone can inspect an entire neighborhood in the time it takes to climb one roof — with zero fall risk.</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
