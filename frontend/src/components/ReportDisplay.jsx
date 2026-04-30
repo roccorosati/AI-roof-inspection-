@@ -21,6 +21,46 @@ function getSev(issues, keywords) {
 
 // ─── Building-block components ─────────────────────────────────────────────────
 
+// Strips white/near-white background from logo using canvas pixel manipulation
+function LogoImage({ src }) {
+  const [cleanSrc, setCleanSrc] = useState(null);
+
+  useEffect(() => {
+    if (!src) return;
+    const img = new window.Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width  = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      try {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const d = imageData.data;
+        for (let i = 0; i < d.length; i += 4) {
+          const r = d[i], g = d[i + 1], b = d[i + 2];
+          // For pixels where all channels are above 210, fade alpha toward 0 as they approach white
+          if (r > 210 && g > 210 && b > 210) {
+            const whiteness = (r + g + b) / 3;
+            d[i + 3] = Math.round(d[i + 3] * Math.max(0, 1 - (whiteness - 210) / 45));
+          }
+        }
+        ctx.putImageData(imageData, 0, 0);
+        setCleanSrc(canvas.toDataURL('image/png'));
+      } catch {
+        setCleanSrc(src); // fallback if canvas is tainted
+      }
+    };
+    img.onerror = () => setCleanSrc(src);
+    img.src = src;
+  }, [src]);
+
+  if (!cleanSrc) return null;
+  return (
+    <img src={cleanSrc} alt="Company Logo" style={{ maxHeight: 60, maxWidth: 220, objectFit: 'contain', display: 'block' }} />
+  );
+}
+
 // Page header — logo left, title right, rule below
 function PageHeader({ num, report, companyLogo }) {
   return (
@@ -31,7 +71,7 @@ function PageHeader({ num, report, companyLogo }) {
         {/* Logo block — company image or fallback text */}
         {companyLogo ? (
           <div style={{ height: 60, display: 'flex', alignItems: 'center' }}>
-            <img src={companyLogo} alt="Company Logo" style={{ maxHeight: 60, maxWidth: 220, objectFit: 'contain', display: 'block' }} />
+            <LogoImage src={companyLogo} />
           </div>
         ) : (
           <div style={{ border: '3px solid #000', padding: '4px 10px', display: 'inline-block', lineHeight: 1.1 }}>
@@ -360,20 +400,27 @@ export default function ReportDisplay({ report, onReset, companyLogo }) {
     const pdf  = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
     const pdfW = pdf.internal.pageSize.getWidth();
     const pdfH = pdf.internal.pageSize.getHeight();
-    for (let i = 0; i < pages.length; i++) {
-      const canvas  = await html2canvas(pages[i], { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false });
-      const imgData = canvas.toDataURL('image/png');
-      const imgW = pdfW, imgH = (canvas.height * pdfW) / canvas.width;
-      if (i > 0) pdf.addPage();
-      if (imgH <= pdfH) {
-        pdf.addImage(imgData, 'PNG', 0, 0, imgW, imgH);
-      } else {
-        let yOff = 0, rem = imgH, first = true;
-        while (rem > 0) {
-          if (!first) pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 0, -yOff, imgW, imgH);
-          yOff += pdfH; rem -= pdfH; first = false;
-        }
+    let firstPdfPage = true;
+    for (const page of pages) {
+      const canvas = await html2canvas(page, { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false });
+      // How many canvas pixels equal one PDF page height
+      const mmPerPx    = pdfW / canvas.width;
+      const pageHtPx   = Math.round(pdfH / mmPerPx);
+      // Slice the canvas into letter-page-sized strips, one PDF page per strip
+      let srcY = 0;
+      while (srcY < canvas.height) {
+        if (!firstPdfPage) pdf.addPage();
+        firstPdfPage = false;
+        const sliceH  = Math.min(pageHtPx, canvas.height - srcY);
+        const slice   = document.createElement('canvas');
+        slice.width   = canvas.width;
+        slice.height  = pageHtPx;
+        const ctx = slice.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, slice.width, slice.height);
+        ctx.drawImage(canvas, 0, srcY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+        pdf.addImage(slice.toDataURL('image/png'), 'PNG', 0, 0, pdfW, pdfH);
+        srcY += pageHtPx;
       }
     }
     pdf.save(`roof-inspection-${report.reportId || new Date().toISOString().slice(0, 10)}.pdf`);
@@ -419,7 +466,7 @@ export default function ReportDisplay({ report, onReset, companyLogo }) {
 
             <Section title="Property / Building Information">
               <Row2 left={{ label: 'Inspection Date', value: report.inspectionDate }} right={{ label: 'Inspector', value: report.inspectorName }} />
-              <Row label="Property Address" value={report.propertyAddress} />
+              <Row2 left={{ label: 'Property Address', value: report.propertyAddress }} right={{ label: 'Number of Stories', value: report.numberOfStories || '—' }} />
               <Row2 left={{ label: 'City', value: report.city }} right={{ label: 'State / ZIP', value: [report.state, report.zip].filter(Boolean).join('  ') }} />
               <Row2 left={{ label: 'Weather Conditions', value: report.weatherConditions || 'Not recorded' }} right={{ label: 'Report ID', value: report.reportId }} last />
             </Section>
@@ -622,7 +669,7 @@ export default function ReportDisplay({ report, onReset, companyLogo }) {
           <PageFooter num={5} {...fp} />
         </div>
 
-        {/* ══ PAGE 6: Insurance + Additional Recs + Disclaimers + Sign-Off ════ */}
+        {/* ══ PAGE 6: Insurance + Additional Recs + Inspector Cert ════════════ */}
         <div data-pdf-page style={PAGE_STYLE}>
           <PageHeader companyLogo={companyLogo} num={6} report={report} />
           <div style={{ padding: '0 24px', flex: 1 }}>
@@ -639,29 +686,49 @@ export default function ReportDisplay({ report, onReset, companyLogo }) {
               </Section>
             )}
 
-            <Section title="Section 8 — Disclaimers & Limitations">
-              <Bullets items={[
-                'This report is based on a visual inspection of the roof surface using photographic evidence. No destructive testing or invasive investigation was performed.',
-                'Findings reflect observable conditions at the time of inspection only. Hidden or concealed damage not visible from photographs may exist.',
-                'This report does not constitute a guarantee, warranty, or prediction of future performance of any roof component.',
-                'AI-assisted analysis is intended to aid licensed professionals and does not replace a physical on-site inspection by a certified roofing contractor.',
-                'Cost estimates are approximations based on typical industry pricing and are subject to change based on contractor bids and site conditions.',
-                'This report does not guarantee approval of any insurance claim. Final decisions are at the sole discretion of the insurance carrier.',
-              ]} last />
+            <Section title="Section 8 — Inspector Certification">
+              <Row2 left={{ label: 'Inspector Name', value: report.inspectorName }} right={{ label: 'Company Name', value: report.companyName }} />
+              <Row2 left={{ label: 'License Number', value: report.licenseNumber || 'N/A' }} right={{ label: 'Date of Report', value: report.inspectionDate }} last />
             </Section>
 
-            <Section title="Section 9 — Inspector Certification & Sign-Off">
-              <Sub title="Inspector Certification" />
-              <Row2 left={{ label: 'Inspector Name', value: report.inspectorName }} right={{ label: 'Company Name', value: report.companyName }} />
-              <Row2 left={{ label: 'License Number', value: report.licenseNumber || 'N/A' }} right={{ label: 'Date of Report', value: report.inspectionDate }} />
-              <div style={{ padding: '12px 14px', borderTop: '1px solid #ccc', borderBottom: '1px solid #ccc' }}>
-                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: 6 }}>Inspector Signature</div>
-                <div style={{ height: 52, border: '1px solid #ccc', background: '#fafafa', borderBottom: '2px solid #000', display: 'flex', alignItems: 'flex-end', paddingBottom: 4, paddingLeft: 10 }}>
-                  <span style={{ fontSize: 9, color: '#bbb', fontStyle: 'italic' }}>Authorized signature</span>
+          </div>
+          <PageFooter num={6} {...fp} />
+        </div>
+
+        {/* ══ PAGE 7: Disclaimers & Sign-Off ══════════════════════════════════ */}
+        <div data-pdf-page style={PAGE_STYLE}>
+          <PageHeader companyLogo={companyLogo} num={7} report={report} />
+          <div style={{ padding: '0 24px', flex: 1 }}>
+
+            <Section title="Section 9 — Disclaimers & Limitations">
+              <div style={{ padding: '6px 12px' }}>
+                {[
+                  ['Scope', 'Based on photographic evidence only; no destructive testing or physical on-site inspection was performed.'],
+                  ['Hidden Damage', 'Observable conditions only; concealed or subsurface damage not visible in photos may exist and is not covered.'],
+                  ['No Warranty', 'Does not constitute a guarantee, warranty, or prediction of future performance for any roof component.'],
+                  ['AI-Assisted Analysis', 'AI analysis is intended to assist licensed professionals only and does not replace a certified on-site roofing inspection.'],
+                  ['Cost Estimates', 'All cost figures are approximations based on regional averages; final pricing is subject to contractor bids and site conditions.'],
+                  ['Insurance Claims', 'Does not guarantee insurance claim approval; all coverage decisions rest solely with the insurance carrier.'],
+                  ['Limitation of Liability', 'Liability is limited to the cost of the inspection service; no further damages are assumed.'],
+                  ['Confidentiality', 'Prepared exclusively for the named client and property; redistribution without written consent is prohibited.'],
+                ].map(([title, text], i, arr) => (
+                  <div key={i} style={{ borderBottom: i < arr.length - 1 ? '1px solid #e0e0e0' : 'none', padding: '5px 0' }}>
+                    <span style={{ fontSize: 11, fontWeight: 700 }}>{title}. </span>
+                    <span style={{ fontSize: 11, lineHeight: 1.5, color: '#222' }}>{text}</span>
+                  </div>
+                ))}
+              </div>
+            </Section>
+
+            <Section title="Section 10 — Inspector &amp; Client Sign-Off">
+              <Sub title="Inspector Signature" />
+              <div style={{ padding: '8px 12px', borderBottom: '1px solid #ccc' }}>
+                <div style={{ height: 46, border: '1px solid #ccc', background: '#fafafa', borderBottom: '2px solid #000', display: 'flex', alignItems: 'flex-end', paddingBottom: 4, paddingLeft: 10 }}>
+                  <span style={{ fontSize: 9, color: '#bbb', fontStyle: 'italic' }}>Authorized inspector signature</span>
                 </div>
               </div>
               <Sub title="Homeowner / Client Acknowledgment" />
-              <div style={{ padding: '14px' }}>
+              <div style={{ padding: '10px 12px' }}>
                 <SignaturePad />
               </div>
             </Section>
