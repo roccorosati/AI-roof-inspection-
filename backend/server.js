@@ -240,9 +240,68 @@ app.get('/api/me', requireAuth, async (req, res) => {
     const db = await readUsers();
     const user = db.users.find(u => u.id === req.userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ id: user.id, fullName: user.fullName, email: user.email, username: user.username });
+    res.json({ id: user.id, fullName: user.fullName, email: user.email, username: user.username, createdAt: user.createdAt, logo: user.logo || null, companyName: user.companyName || '' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to load user' });
+  }
+});
+
+// ── Account update endpoint ───────────────────────────────────────────────────
+
+app.patch('/api/account', requireAuth, async (req, res) => {
+  try {
+    const { companyName } = req.body;
+    const db  = await readUsers();
+    const idx = db.users.findIndex(u => u.id === req.userId);
+    if (idx === -1) return res.status(404).json({ error: 'User not found' });
+    if (companyName !== undefined) db.users[idx].companyName = sanitizeInput(companyName);
+    await writeUsers(db);
+    const u = db.users[idx];
+    res.json({ id: u.id, fullName: u.fullName, email: u.email, username: u.username, createdAt: u.createdAt, logo: u.logo || null, companyName: u.companyName || '' });
+  } catch (err) {
+    console.error('Account update error:', err);
+    res.status(500).json({ error: 'Failed to update account' });
+  }
+});
+
+// ── Logo endpoints ────────────────────────────────────────────────────────────
+
+const logoUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 4 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+    if (allowed.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Only image files are allowed'));
+  },
+});
+
+app.post('/api/account/logo', requireAuth, logoUpload.single('logo'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No logo provided' });
+    const logoBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    const db = await readUsers();
+    const idx = db.users.findIndex(u => u.id === req.userId);
+    if (idx === -1) return res.status(404).json({ error: 'User not found' });
+    db.users[idx].logo = logoBase64;
+    await writeUsers(db);
+    res.json({ success: true, logo: logoBase64 });
+  } catch (err) {
+    console.error('Logo upload error:', err);
+    res.status(500).json({ error: 'Failed to save logo' });
+  }
+});
+
+app.delete('/api/account/logo', requireAuth, async (req, res) => {
+  try {
+    const db = await readUsers();
+    const idx = db.users.findIndex(u => u.id === req.userId);
+    if (idx === -1) return res.status(404).json({ error: 'User not found' });
+    delete db.users[idx].logo;
+    await writeUsers(db);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to remove logo' });
   }
 });
 

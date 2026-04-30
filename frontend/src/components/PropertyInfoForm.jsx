@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const ROOF_TYPES = [
   'Asphalt Shingle',
@@ -81,7 +81,7 @@ function GroupHeader({ number, title }) {
   );
 }
 
-export default function PropertyInfoForm({ onSubmit }) {
+export default function PropertyInfoForm({ onSubmit, defaultCompanyName = '' }) {
   const today = new Date().toISOString().slice(0, 10);
   const [form, setForm] = useState({
     reportId: generateReportId(),
@@ -99,6 +99,13 @@ export default function PropertyInfoForm({ onSubmit }) {
     numberOfStories: '',
   });
   const [errors, setErrors] = useState({});
+
+  // Pre-fill company name from account once the async fetch resolves
+  useEffect(() => {
+    if (defaultCompanyName) {
+      setForm(prev => ({ ...prev, companyName: prev.companyName || defaultCompanyName }));
+    }
+  }, [defaultCompanyName]);
 
   function set(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));

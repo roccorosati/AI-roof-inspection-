@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ImageUploader from '../components/ImageUploader.jsx';
 import ReportDisplay from '../components/ReportDisplay.jsx';
 import LoadingState from '../components/LoadingState.jsx';
@@ -52,6 +52,18 @@ export default function InspectionApp() {
   const [images, setImages] = useState([]);
   const [report, setReport] = useState(null);
   const [error, setError] = useState(null);
+  const [companyLogo, setCompanyLogo] = useState(null);
+  const [accountCompanyName, setAccountCompanyName] = useState('');
+
+  useEffect(() => {
+    fetch('/api/me', { credentials: 'include' })
+      .then(r => r.json())
+      .then(user => {
+        if (user.logo) setCompanyLogo(user.logo);
+        if (user.companyName) setAccountCompanyName(user.companyName);
+      })
+      .catch(() => {});
+  }, []);
 
   function handleFormSubmit(info) {
     setPropertyInfo(info);
@@ -120,7 +132,7 @@ export default function InspectionApp() {
       <main style={{ flex: 1, maxWidth: 1100, width: '100%', margin: '0 auto', padding: '32px 24px' }}>
         {step < 3 && <StepIndicator current={stepIndex} />}
 
-        {step === 0 && <PropertyInfoForm onSubmit={handleFormSubmit} />}
+        {step === 0 && <PropertyInfoForm onSubmit={handleFormSubmit} defaultCompanyName={accountCompanyName} />}
 
         {step === 1 && (
           <div>
@@ -160,7 +172,7 @@ export default function InspectionApp() {
 
         {step === 2 && <LoadingState />}
 
-        {step === 3 && report && <ReportDisplay report={report} onReset={handleReset} />}
+        {step === 3 && report && <ReportDisplay report={report} onReset={handleReset} companyLogo={companyLogo} />}
       </main>
 
       <AppFooter />

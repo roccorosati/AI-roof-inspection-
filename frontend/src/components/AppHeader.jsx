@@ -54,7 +54,7 @@ export default function AppHeader() {
 
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
           {navLink('/app', 'New Report', isApp)}
-          {navLink('/account', 'My Reports', isAccount)}
+          {navLink('/account', 'Account', isAccount)}
           <button
             onClick={handleLogout}
             style={{
