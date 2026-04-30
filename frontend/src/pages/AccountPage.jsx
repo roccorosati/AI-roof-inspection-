@@ -334,7 +334,7 @@ export default function AccountPage() {
                   {isExpanded && (
                     <div style={{ borderTop: '1px solid #e2e8f0', padding: '0 22px 24px' }}>
                       <ReportDisplay
-                        report={{ ...r, ...pi, imagePreviews: [] }}
+                        report={{ ...r, ...pi, imagePreviews: [], companyName: user?.companyName || pi?.companyName || r?.companyName || '' }}
                         onReset={null}
                         companyLogo={user?.logo || null}
                       />
