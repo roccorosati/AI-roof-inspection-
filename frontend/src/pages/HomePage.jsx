@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import MarketingNav from '../components/MarketingNav.jsx';
+import SmartNav from '../components/SmartNav.jsx';
 
 const features = [
   {
@@ -43,7 +43,7 @@ export default function HomePage() {
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
 
-      <MarketingNav />
+      <SmartNav />
 
       {/* Hero */}
       <section style={{ position: 'relative', padding: '110px 24px 90px', textAlign: 'center', overflow: 'hidden' }}>

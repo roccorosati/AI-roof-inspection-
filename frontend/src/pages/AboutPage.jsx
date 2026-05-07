@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import MarketingNav from '../components/MarketingNav.jsx';
+import SmartNav from '../components/SmartNav.jsx';
 
 const values = [
   {
@@ -34,7 +34,7 @@ const stats = [
 export default function AboutPage() {
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'Inter, sans-serif', background: '#f8fafc' }}>
-      <MarketingNav />
+      <SmartNav />
 
       {/* Hero */}
       <section style={{ position: 'relative', padding: '90px 24px 96px', textAlign: 'center', overflow: 'hidden' }}>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import MarketingNav from '../components/MarketingNav.jsx';
+import SmartNav from '../components/SmartNav.jsx';
 
 const contactReasons = [
   'General question',
@@ -64,7 +64,7 @@ export default function ContactPage() {
 
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'Inter, sans-serif', background: '#f8fafc' }}>
-      <MarketingNav />
+      <SmartNav />
 
       {/* Hero */}
       <section style={{ position: 'relative', padding: '80px 24px 88px', textAlign: 'center', overflow: 'hidden' }}>

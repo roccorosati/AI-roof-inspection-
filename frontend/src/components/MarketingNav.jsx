@@ -1,7 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '@clerk/clerk-react';
 
 export default function MarketingNav() {
   const { pathname } = useLocation();
+  const { isSignedIn } = useAuth();
 
   const navLinks = [
     { to: '/', label: 'Home' },
@@ -49,15 +51,25 @@ export default function MarketingNav() {
 
           <div style={{ width: 1, height: 24, background: 'rgba(255,255,255,0.1)', margin: '0 10px' }} />
 
-          <Link to="/signup" className="btn-link" style={{
-            background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.25)',
-            color: 'white', textDecoration: 'none', padding: '8px 18px', fontSize: 14, fontWeight: 600,
-          }}>Sign Up</Link>
-          <Link to="/login" className="btn-link" style={{
-            background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
-            color: 'white', textDecoration: 'none', padding: '8px 20px', fontSize: 14, fontWeight: 600,
-            boxShadow: '0 2px 8px rgba(37,99,235,0.4)', marginLeft: 6,
-          }}>Sign In</Link>
+          {isSignedIn ? (
+            <Link to="/app" className="btn-link" style={{
+              background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+              color: 'white', textDecoration: 'none', padding: '8px 20px', fontSize: 14, fontWeight: 600,
+              boxShadow: '0 2px 8px rgba(37,99,235,0.4)',
+            }}>Dashboard →</Link>
+          ) : (
+            <>
+              <Link to="/signup" className="btn-link" style={{
+                background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.25)',
+                color: 'white', textDecoration: 'none', padding: '8px 18px', fontSize: 14, fontWeight: 600,
+              }}>Sign Up</Link>
+              <Link to="/login" className="btn-link" style={{
+                background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                color: 'white', textDecoration: 'none', padding: '8px 20px', fontSize: 14, fontWeight: 600,
+                boxShadow: '0 2px 8px rgba(37,99,235,0.4)', marginLeft: 6,
+              }}>Sign In</Link>
+            </>
+          )}
         </div>
       </div>
     </nav>
