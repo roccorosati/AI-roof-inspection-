@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import AppHeader from '../components/AppHeader.jsx';
 import AppFooter from '../components/AppFooter.jsx';
 import ReportDisplay from '../components/ReportDisplay.jsx';
+import { useAuthFetch } from '../lib/auth.js';
 
 export default function AccountPage() {
   const [user, setUser]           = useState(null);
@@ -15,26 +16,26 @@ export default function AccountPage() {
   const [companyNameSaving, setCompanyNameSaving] = useState(false);
   const [companyNameSaved, setCompanyNameSaved] = useState(false);
   const fileRef = useRef(null);
+  const authFetch = useAuthFetch();
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/me', { credentials: 'include' }).then(r => r.json()),
-      fetch('/api/reports', { credentials: 'include' }).then(r => r.json()),
+      authFetch('/api/me').then(r => r.json()),
+      authFetch('/api/reports').then(r => r.json()),
     ]).then(([me, rd]) => {
       setUser(me);
       setCompanyNameInput(me.companyName || '');
       setReports(rd.reports || []);
     }).finally(() => setLoading(false));
-  }, []);
+  }, [authFetch]);
 
   async function handleCompanyNameSave() {
     setCompanyNameSaving(true);
     setCompanyNameSaved(false);
     try {
-      const res  = await fetch('/api/account', {
+      const res  = await authFetch('/api/account', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ companyName: companyNameInput }),
       });
       const data = await res.json();
@@ -61,7 +62,7 @@ export default function AccountPage() {
     try {
       const form = new FormData();
       form.append('logo', file);
-      const res  = await fetch('/api/account/logo', { method: 'POST', body: form, credentials: 'include' });
+      const res  = await authFetch('/api/account/logo', { method: 'POST', body: form });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Upload failed');
       setUser(prev => ({ ...prev, logo: data.logo }));
@@ -77,7 +78,7 @@ export default function AccountPage() {
     setLogoLoading(true);
     setLogoError('');
     try {
-      const res = await fetch('/api/account/logo', { method: 'DELETE', credentials: 'include' });
+      const res = await authFetch('/api/account/logo', { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to remove logo');
       setUser(prev => ({ ...prev, logo: null }));
     } catch (err) {
@@ -142,14 +143,13 @@ export default function AccountPage() {
               }}>{initials}</div>
               <div>
                 <div style={{ fontSize: 18, fontWeight: 700, color: '#0f172a' }}>{user?.fullName}</div>
-                <div style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>@{user?.username}</div>
+                <div style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>{user?.email}</div>
               </div>
             </div>
 
             {/* Detail rows */}
             {[
               { label: 'Email', value: user?.email },
-              { label: 'Username', value: `@${user?.username}` },
               { label: 'Member Since', value: memberSince },
               { label: 'Reports Generated', value: reports.length.toString() },
             ].map(({ label, value }) => (
@@ -195,7 +195,7 @@ export default function AccountPage() {
           <div style={{ background: 'white', border: '1px solid #e2e8f0', padding: '28px 28px', boxShadow: '0 1px 6px rgba(0,0,0,0.04)' }}>
             <h2 style={{ fontSize: 14, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 6 }}>Company Logo</h2>
             <p style={{ fontSize: 12, color: '#94a3b8', marginBottom: 20, lineHeight: 1.6 }}>
-              Upload your company logo. It will replace the "AI Roof Inspector" mark on all future inspection reports.
+              Upload your company logo. It will replace the "RoofWise" mark on all future inspection reports.
             </p>
 
             {/* Logo preview box */}

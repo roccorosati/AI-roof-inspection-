@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuthFetch } from '../lib/auth.js';
 import ImageUploader from '../components/ImageUploader.jsx';
 import ReportDisplay from '../components/ReportDisplay.jsx';
 import LoadingState from '../components/LoadingState.jsx';
@@ -54,16 +55,17 @@ export default function InspectionApp() {
   const [error, setError] = useState(null);
   const [companyLogo, setCompanyLogo] = useState(null);
   const [accountCompanyName, setAccountCompanyName] = useState('');
+  const authFetch = useAuthFetch();
 
   useEffect(() => {
-    fetch('/api/me', { credentials: 'include' })
+    authFetch('/api/me')
       .then(r => r.json())
       .then(user => {
         if (user.logo) setCompanyLogo(user.logo);
         if (user.companyName) setAccountCompanyName(user.companyName);
       })
       .catch(() => {});
-  }, []);
+  }, [authFetch]);
 
   function handleFormSubmit(info) {
     setPropertyInfo(info);
@@ -85,7 +87,7 @@ export default function InspectionApp() {
         formData.append('numberOfStories', propertyInfo.numberOfStories || '');
       }
 
-      const res = await fetch('/api/analyze', { method: 'POST', body: formData, credentials: 'include' });
+      const res = await authFetch('/api/analyze', { method: 'POST', body: formData });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Analysis failed');
 
@@ -102,10 +104,9 @@ export default function InspectionApp() {
       setStep(3);
 
       // Save report to account in the background
-      fetch('/api/reports', {
+      authFetch('/api/reports', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ propertyInfo, report: data.report }),
       }).catch(() => {}); // non-blocking, best-effort
     } catch (err) {

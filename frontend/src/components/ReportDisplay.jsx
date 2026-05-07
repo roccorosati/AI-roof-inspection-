@@ -101,7 +101,7 @@ function PageHeader({ num, report, companyLogo }) {
         marginBottom: 14,
       }}>
         {[report.companyName, report.inspectorName, report.licenseNumber ? `License #${report.licenseNumber}` : null]
-          .filter(Boolean).join('  ·  ') || 'AI Roof Inspector'}
+          .filter(Boolean).join('  ·  ') || 'RoofWise'}
       </div>
     </div>
   );
@@ -116,7 +116,7 @@ function PageFooter({ num, reportId, inspectionDate }) {
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       fontSize: 10, color: '#555', marginTop: 'auto',
     }}>
-      <span>AI Roof Inspector · Confidential Inspection Report</span>
+      <span>RoofWise · Confidential Inspection Report</span>
       <span>Page {num}</span>
       <span>{reportId} · {inspectionDate}</span>
     </div>
@@ -735,7 +735,7 @@ export default function ReportDisplay({ report, onReset, companyLogo }) {
 
           </div>
           <div style={{ background: '#000', padding: '10px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-            <span style={{ color: '#aaa', fontSize: 10 }}>{report.companyName || 'AI Roof Inspector'} · {report.reportId || ''}</span>
+            <span style={{ color: '#aaa', fontSize: 10 }}>{report.companyName || 'RoofWise'} · {report.reportId || ''}</span>
             <span style={{ color: '#aaa', fontSize: 10 }}>AI-Assisted Roof Inspection · {report.inspectionDate}</span>
           </div>
         </div>

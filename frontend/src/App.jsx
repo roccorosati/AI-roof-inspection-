@@ -17,8 +17,9 @@ export default function App() {
         <Route path="/features" element={<FeaturesPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
+        {/* Clerk needs /* so it can handle its own sub-routes (SSO, MFA, etc.) */}
+        <Route path="/login/*" element={<LoginPage />} />
+        <Route path="/signup/*" element={<SignupPage />} />
         <Route path="/app" element={<ProtectedRoute><InspectionApp /></ProtectedRoute>} />
         <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />

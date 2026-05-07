@@ -6,11 +6,11 @@ import Anthropic from '@anthropic-ai/sdk';
 import nodemailer from 'nodemailer';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import cookieParser from 'cookie-parser';
 import crypto from 'crypto';
 import { promises as fs } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import { requireAuth, getCurrentUser, getUserId } from './lib/auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, 'public');
@@ -19,13 +19,10 @@ const REPORTS_FILE = path.join(__dirname, 'reports.json');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-in-production';
 const IS_PROD = process.env.NODE_ENV === 'production';
 
 // ── Security headers ─────────────────────────────────────────────────────────
-app.use(helmet({
-  contentSecurityPolicy: false, // managed separately if needed
-}));
+app.use(helmet({ contentSecurityPolicy: false }));
 
 // ── CORS ─────────────────────────────────────────────────────────────────────
 const ALLOWED_ORIGINS = [`http://localhost:${PORT}`, 'http://localhost:5173'];
@@ -37,19 +34,10 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(cookieParser());
 app.use(express.json({ limit: '10kb' }));
 app.use(express.static(PUBLIC_DIR));
 
 // ── Rate limiters ─────────────────────────────────────────────────────────────
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  message: { error: 'Too many attempts. Please try again in 15 minutes.' },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
 const analyzeLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 5,
@@ -58,63 +46,18 @@ const analyzeLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// ── In-memory sessions ────────────────────────────────────────────────────────
-const sessions = new Map(); // token -> { userId, expiresAt }
-const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
+const contactLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { error: 'Too many messages sent. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
-function createSession(userId) {
-  const token = crypto.randomBytes(32).toString('hex');
-  sessions.set(token, { userId, expiresAt: Date.now() + SESSION_TTL_MS });
-  return token;
-}
-
-function getSession(token) {
-  if (!token) return null;
-  const session = sessions.get(token);
-  if (!session) return null;
-  if (Date.now() > session.expiresAt) {
-    sessions.delete(token);
-    return null;
-  }
-  return session;
-}
-
-function destroySession(token) {
-  sessions.delete(token);
-}
-
-// ── Cookie helpers ────────────────────────────────────────────────────────────
-const COOKIE_OPTS = {
-  httpOnly: true,
-  sameSite: 'lax',
-  secure: IS_PROD,
-  maxAge: SESSION_TTL_MS,
-};
-
-function setAuthCookies(res, token) {
-  res.cookie('authToken', token, COOKIE_OPTS);
-  // loggedIn is readable by JS so React can check auth state for routing
-  res.cookie('loggedIn', '1', { ...COOKIE_OPTS, httpOnly: false });
-}
-
-function clearAuthCookies(res) {
-  res.clearCookie('authToken');
-  res.clearCookie('loggedIn');
-}
-
-// ── Auth middleware ───────────────────────────────────────────────────────────
-function requireAuth(req, res, next) {
-  const session = getSession(req.cookies.authToken);
-  if (!session) return res.status(401).json({ error: 'Not authenticated' });
-  req.userId = session.userId;
-  next();
-}
-
-// ── User storage ──────────────────────────────────────────────────────────────
+// ── Storage helpers ───────────────────────────────────────────────────────────
 async function readUsers() {
   try {
-    const raw = await fs.readFile(USERS_FILE, 'utf-8');
-    return JSON.parse(raw);
+    return JSON.parse(await fs.readFile(USERS_FILE, 'utf-8'));
   } catch {
     return { users: [] };
   }
@@ -124,11 +67,9 @@ async function writeUsers(data) {
   await fs.writeFile(USERS_FILE, JSON.stringify(data, null, 2));
 }
 
-// ── Report storage ────────────────────────────────────────────────────────────
 async function readReports() {
   try {
-    const raw = await fs.readFile(REPORTS_FILE, 'utf-8');
-    return JSON.parse(raw);
+    return JSON.parse(await fs.readFile(REPORTS_FILE, 'utf-8'));
   } catch {
     return { reports: [] };
   }
@@ -138,126 +79,34 @@ async function writeReports(data) {
   await fs.writeFile(REPORTS_FILE, JSON.stringify(data, null, 2));
 }
 
-// ── Password hashing ──────────────────────────────────────────────────────────
-function hashPassword(password, salt) {
-  return new Promise((resolve, reject) => {
-    crypto.scrypt(password, salt, 64, (err, hash) => {
-      if (err) reject(err);
-      else resolve(hash.toString('hex'));
-    });
-  });
-}
-
 function sanitizeInput(str) {
   return String(str || '').replace(/[<>]/g, '').trim().slice(0, 200);
 }
 
-// ── Auth endpoints ────────────────────────────────────────────────────────────
+// ── User endpoints ────────────────────────────────────────────────────────────
 
-app.post('/api/signup', authLimiter, async (req, res) => {
-  try {
-    const { fullName, email, username, password } = req.body;
-    if (!fullName || !email || !username || !password)
-      return res.status(400).json({ error: 'All fields are required' });
-    if (password.length < 8)
-      return res.status(400).json({ error: 'Password must be at least 8 characters' });
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-      return res.status(400).json({ error: 'Invalid email address' });
-    if (!/^[a-zA-Z0-9_]{3,30}$/.test(username))
-      return res.status(400).json({ error: 'Username must be 3–30 characters (letters, numbers, underscores)' });
-
-    const db = await readUsers();
-    const emailLower = email.trim().toLowerCase();
-    const usernameLower = username.trim().toLowerCase();
-
-    if (db.users.find(u => u.email === emailLower))
-      return res.status(409).json({ error: 'An account with that email already exists' });
-    if (db.users.find(u => u.username.toLowerCase() === usernameLower))
-      return res.status(409).json({ error: 'That username is already taken' });
-
-    const salt = crypto.randomBytes(16).toString('hex');
-    const passwordHash = await hashPassword(password, salt);
-
-    const user = {
-      id: crypto.randomUUID(),
-      fullName: fullName.trim(),
-      email: emailLower,
-      username: username.trim(),
-      passwordHash,
-      passwordSalt: salt,
-      createdAt: new Date().toISOString(),
-    };
-
-    db.users.push(user);
-    await writeUsers(db);
-
-    const token = createSession(user.id);
-    setAuthCookies(res, token);
-
-    res.status(201).json({ id: user.id, fullName: user.fullName, email: user.email, username: user.username });
-  } catch (err) {
-    console.error('Signup error:', err);
-    res.status(500).json({ error: 'Failed to create account' });
-  }
+app.get('/api/me', requireAuth, (req, res) => {
+  const u = req.internalUser;
+  res.json({
+    id: u.id,
+    fullName: u.fullName,
+    email: u.email,
+    createdAt: u.createdAt,
+    logo: u.logo || null,
+    companyName: u.companyName || '',
+  });
 });
-
-app.post('/api/login', authLimiter, async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    if (!username || !password)
-      return res.status(400).json({ error: 'Username and password are required' });
-
-    const db = await readUsers();
-    const query = username.trim().toLowerCase();
-    const user = db.users.find(u => u.email === query || u.username.toLowerCase() === query);
-
-    if (!user)
-      return res.status(401).json({ error: 'Invalid credentials' });
-
-    const hash = await hashPassword(password, user.passwordSalt);
-    const valid = crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(user.passwordHash));
-    if (!valid)
-      return res.status(401).json({ error: 'Invalid credentials' });
-
-    const token = createSession(user.id);
-    setAuthCookies(res, token);
-
-    res.json({ id: user.id, fullName: user.fullName, email: user.email, username: user.username });
-  } catch (err) {
-    console.error('Login error:', err);
-    res.status(500).json({ error: 'Login failed' });
-  }
-});
-
-app.post('/api/logout', (req, res) => {
-  destroySession(req.cookies.authToken);
-  clearAuthCookies(res);
-  res.json({ success: true });
-});
-
-app.get('/api/me', requireAuth, async (req, res) => {
-  try {
-    const db = await readUsers();
-    const user = db.users.find(u => u.id === req.userId);
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ id: user.id, fullName: user.fullName, email: user.email, username: user.username, createdAt: user.createdAt, logo: user.logo || null, companyName: user.companyName || '' });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to load user' });
-  }
-});
-
-// ── Account update endpoint ───────────────────────────────────────────────────
 
 app.patch('/api/account', requireAuth, async (req, res) => {
   try {
     const { companyName } = req.body;
-    const db  = await readUsers();
-    const idx = db.users.findIndex(u => u.id === req.userId);
+    const db = await readUsers();
+    const idx = db.users.findIndex(u => u.id === getUserId(req));
     if (idx === -1) return res.status(404).json({ error: 'User not found' });
     if (companyName !== undefined) db.users[idx].companyName = sanitizeInput(companyName);
     await writeUsers(db);
     const u = db.users[idx];
-    res.json({ id: u.id, fullName: u.fullName, email: u.email, username: u.username, createdAt: u.createdAt, logo: u.logo || null, companyName: u.companyName || '' });
+    res.json({ id: u.id, fullName: u.fullName, email: u.email, createdAt: u.createdAt, logo: u.logo || null, companyName: u.companyName || '' });
   } catch (err) {
     console.error('Account update error:', err);
     res.status(500).json({ error: 'Failed to update account' });
@@ -281,7 +130,7 @@ app.post('/api/account/logo', requireAuth, logoUpload.single('logo'), async (req
     if (!req.file) return res.status(400).json({ error: 'No logo provided' });
     const logoBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     const db = await readUsers();
-    const idx = db.users.findIndex(u => u.id === req.userId);
+    const idx = db.users.findIndex(u => u.id === getUserId(req));
     if (idx === -1) return res.status(404).json({ error: 'User not found' });
     db.users[idx].logo = logoBase64;
     await writeUsers(db);
@@ -295,7 +144,7 @@ app.post('/api/account/logo', requireAuth, logoUpload.single('logo'), async (req
 app.delete('/api/account/logo', requireAuth, async (req, res) => {
   try {
     const db = await readUsers();
-    const idx = db.users.findIndex(u => u.id === req.userId);
+    const idx = db.users.findIndex(u => u.id === getUserId(req));
     if (idx === -1) return res.status(404).json({ error: 'User not found' });
     delete db.users[idx].logo;
     await writeUsers(db);
@@ -311,7 +160,7 @@ app.get('/api/reports', requireAuth, async (req, res) => {
   try {
     const db = await readReports();
     const userReports = db.reports
-      .filter(r => r.userId === req.userId)
+      .filter(r => r.userId === getUserId(req))
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     res.json({ reports: userReports });
   } catch (err) {
@@ -323,11 +172,10 @@ app.post('/api/reports', requireAuth, async (req, res) => {
   try {
     const { propertyInfo, report } = req.body;
     if (!report) return res.status(400).json({ error: 'Report data is required' });
-
     const db = await readReports();
     const entry = {
       id: crypto.randomUUID(),
-      userId: req.userId,
+      userId: getUserId(req),
       createdAt: new Date().toISOString(),
       propertyInfo: propertyInfo || {},
       report,
@@ -340,11 +188,10 @@ app.post('/api/reports', requireAuth, async (req, res) => {
   }
 });
 
-// ── Analysis endpoint (protected) ─────────────────────────────────────────────
+// ── Analysis endpoint ─────────────────────────────────────────────────────────
 
-const storage = multer.memoryStorage();
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 20 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = ['image/jpeg', 'image/png', 'image/webp'];
@@ -514,18 +361,9 @@ app.post('/api/analyze', requireAuth, analyzeLimiter, upload.array('images', 10)
 
 // ── Contact endpoint ──────────────────────────────────────────────────────────
 
-const contactLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 5,
-  message: { error: 'Too many messages sent. Please try again later.' },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
 app.post('/api/contact', contactLimiter, async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
-
     if (!name || !email || !message)
       return res.status(400).json({ error: 'Name, email, and message are required.' });
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -550,11 +388,9 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
       tls: { rejectUnauthorized: false },
     });
 
-    const recipient = process.env.CONTACT_RECIPIENT || process.env.SMTP_USER;
-
     await transporter.sendMail({
-      from: `"AI Roof Inspector" <${process.env.SMTP_USER}>`,
-      to: recipient,
+      from: `"RoofWise" <${process.env.SMTP_USER}>`,
+      to: process.env.CONTACT_RECIPIENT || process.env.SMTP_USER,
       replyTo: safeEmail,
       subject: `[Contact Form] ${safeSubject}`,
       text: `Name: ${safeName}\nEmail: ${safeEmail}\nSubject: ${safeSubject}\n\n${safeMessage}`,

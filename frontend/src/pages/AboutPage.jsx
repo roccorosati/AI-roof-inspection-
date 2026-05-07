@@ -49,7 +49,7 @@ export default function AboutPage() {
         }} />
         <div style={{ position: 'relative', maxWidth: 680, margin: '0 auto' }}>
           <h1 style={{ color: 'white', fontSize: 46, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-1.2px', marginBottom: 20 }}>
-            Why we built<br /><span style={{ color: '#60a5fa' }}>AI Roof Inspector</span>
+            Why we built<br /><span style={{ color: '#60a5fa' }}>RoofWise</span>
           </h1>
           <p style={{ color: '#cbd5e1', fontSize: 17, lineHeight: 1.75 }}>
             Writing inspection reports is one of the most time-consuming parts of a roofing inspector's job.
@@ -73,7 +73,7 @@ export default function AboutPage() {
           <div style={{ flex: '1 1 360px' }}>
             <h2 style={{ fontSize: 30, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.6px', marginBottom: 24 }}>Our story</h2>
             <p style={{ color: '#475569', fontSize: 16, lineHeight: 1.85, marginBottom: 20 }}>
-              AI Roof Inspector started with a simple observation: professional inspectors spend hours writing reports
+              RoofWise started with a simple observation: professional inspectors spend hours writing reports
               that could be generated in seconds with the right technology. Between the field work, the photo sorting,
               the damage cataloging, and the final report formatting — most of the effort after the inspection was
               repetitive and manual.
@@ -84,8 +84,7 @@ export default function AboutPage() {
               complete report. That's the whole product.
             </p>
             <p style={{ color: '#475569', fontSize: 16, lineHeight: 1.85 }}>
-              We're a small team that believes the best software tools are the ones that get out of your way. If AI
-              Roof Inspector saves you an hour on every job, it's doing its job.
+              We're a small team that believes the best software tools are the ones that get out of your way. If RoofWise saves you an hour on every job, it's doing its job.
             </p>
           </div>
         </div>
@@ -174,7 +173,7 @@ export default function AboutPage() {
       </section>
 
       <footer style={{ background: '#0f172a', padding: '28px 24px', textAlign: 'center', color: '#475569', fontSize: 13 }}>
-        <div style={{ marginBottom: 6, color: '#64748b' }}>AI Roof Inspector</div>
+        <div style={{ marginBottom: 6, color: '#64748b' }}>RoofWise</div>
         <div style={{ color: '#334155', fontSize: 12 }}>For professional use only · All reports should be verified by a licensed inspector</div>
       </footer>
     </div>

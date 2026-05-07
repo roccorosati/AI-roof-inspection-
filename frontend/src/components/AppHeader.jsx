@@ -1,13 +1,8 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { UserButton } from '@clerk/clerk-react';
 
 export default function AppHeader() {
-  const navigate = useNavigate();
   const location = useLocation();
-
-  async function handleLogout() {
-    await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-    navigate('/');
-  }
 
   const isApp = location.pathname === '/app';
   const isAccount = location.pathname === '/account';
@@ -38,35 +33,13 @@ export default function AppHeader() {
     }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{
-            width: 40, height: 40,
-            background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 20, flexShrink: 0,
-          }}>
-            🏠
-          </div>
-          <div>
-            <div style={{ color: 'white', fontSize: 16, fontWeight: 700, letterSpacing: '-0.3px' }}>AI Roof Inspector</div>
-            <div style={{ color: '#64748b', fontSize: 11 }}>Professional inspection reports</div>
-          </div>
+          <div style={{ color: 'white', fontSize: 20, fontWeight: 800, letterSpacing: '-0.5px' }}>RoofWise</div>
         </div>
 
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
           {navLink('/app', 'New Report', isApp)}
           {navLink('/account', 'Account', isAccount)}
-          <button
-            onClick={handleLogout}
-            style={{
-              background: 'rgba(255,255,255,0.08)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              color: '#94a3b8', fontSize: 14, fontWeight: 500,
-              padding: '7px 16px', cursor: 'pointer',
-              transition: 'all 0.15s',
-            }}
-          >
-            Sign Out
-          </button>
+          <UserButton afterSignOutUrl="/" />
         </div>
       </div>
     </header>

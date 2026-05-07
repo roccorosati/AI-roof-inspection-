@@ -255,7 +255,7 @@ export default function ContactPage() {
       </section>
 
       <footer style={{ background: '#0f172a', padding: '28px 24px', textAlign: 'center', color: '#475569', fontSize: 13 }}>
-        <div style={{ marginBottom: 6, color: '#64748b' }}>AI Roof Inspector</div>
+        <div style={{ marginBottom: 6, color: '#64748b' }}>RoofWise</div>
         <div style={{ color: '#334155', fontSize: 12 }}>For professional use only · All reports should be verified by a licensed inspector</div>
       </footer>
     </div>

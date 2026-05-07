@@ -21,16 +21,7 @@ export default function MarketingNav() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{
-            width: 44, height: 44,
-            background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 22, flexShrink: 0,
-          }}>🏠</div>
-          <div>
-            <div style={{ color: 'white', fontSize: 18, fontWeight: 700, letterSpacing: '-0.3px' }}>AI Roof Inspector</div>
-            <div style={{ color: '#94a3b8', fontSize: 11, marginTop: 1 }}>Professional inspection reports</div>
-          </div>
+          <div style={{ color: 'white', fontSize: 22, fontWeight: 800, letterSpacing: '-0.5px' }}>RoofWise</div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>

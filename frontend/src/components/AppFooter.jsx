@@ -8,7 +8,7 @@ export default function AppFooter() {
       fontSize: 12,
       borderTop: '1px solid #1e293b',
     }}>
-      <div style={{ marginBottom: 4, color: '#64748b' }}>AI Roof Inspector — Powered by Claude AI</div>
+      <div style={{ marginBottom: 4, color: '#64748b' }}>RoofWise — Powered by Claude AI</div>
       <div style={{ color: '#334155' }}>For professional use only · All reports should be verified by a licensed inspector</div>
     </footer>
   );

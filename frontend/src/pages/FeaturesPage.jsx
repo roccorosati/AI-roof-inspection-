@@ -67,7 +67,7 @@ export default function FeaturesPage() {
             Built for the field.<br /><span style={{ color: '#60a5fa' }}>Ready to submit.</span>
           </h1>
           <p style={{ color: '#cbd5e1', fontSize: 17, lineHeight: 1.7 }}>
-            Every feature in AI Roof Inspector was designed around one question: what does a professional need to close a job faster?
+            Every feature in RoofWise was designed around one question: what does a professional need to close a job faster?
           </p>
         </div>
       </section>
@@ -172,7 +172,7 @@ export default function FeaturesPage() {
       </section>
 
       <footer style={{ background: '#0f172a', padding: '28px 24px', textAlign: 'center', color: '#475569', fontSize: 13 }}>
-        <div style={{ marginBottom: 6, color: '#64748b' }}>AI Roof Inspector</div>
+        <div style={{ marginBottom: 6, color: '#64748b' }}>RoofWise</div>
         <div style={{ color: '#334155', fontSize: 12 }}>For professional use only · All reports should be verified by a licensed inspector</div>
       </footer>
     </div>
