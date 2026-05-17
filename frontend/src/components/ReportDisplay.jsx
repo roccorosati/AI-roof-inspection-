@@ -316,7 +316,10 @@ function SignaturePad() {
 
   function getPos(e, c) {
     const r = c.getBoundingClientRect(), src = e.touches ? e.touches[0] : e;
-    return { x: src.clientX - r.left, y: src.clientY - r.top };
+    return {
+      x: (src.clientX - r.left) * (c.width / r.width),
+      y: (src.clientY - r.top) * (c.height / r.height),
+    };
   }
   function startDraw(e) { e.preventDefault(); isDrawing.current = true; lastPos.current = getPos(e, canvasRef.current); }
   function draw(e) {

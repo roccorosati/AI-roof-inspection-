@@ -3,6 +3,7 @@ import HomePage from './pages/HomePage.jsx';
 import FeaturesPage from './pages/FeaturesPage.jsx';
 import AboutPage from './pages/AboutPage.jsx';
 import ContactPage from './pages/ContactPage.jsx';
+import PricingPage from './pages/PricingPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import SignupPage from './pages/SignupPage.jsx';
 import InspectionApp from './pages/InspectionApp.jsx';
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/features" element={<FeaturesPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
         {/* Clerk needs /* so it can handle its own sub-routes (SSO, MFA, etc.) */}
         <Route path="/login/*" element={<LoginPage />} />
         <Route path="/signup/*" element={<SignupPage />} />

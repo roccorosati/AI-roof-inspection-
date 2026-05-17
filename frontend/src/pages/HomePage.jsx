@@ -260,6 +260,54 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Pricing snapshot */}
+      <section style={{ background: '#f8fafc', padding: '80px 24px' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', textAlign: 'center' }}>
+          <h2 style={{ fontSize: 34, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.8px', marginBottom: 12 }}>
+            Pricing that makes sense.
+          </h2>
+          <p style={{ color: '#64748b', fontSize: 16, maxWidth: 440, margin: '0 auto 52px' }}>
+            Start free, upgrade when you're ready. Cancel anytime.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, marginBottom: 32 }}>
+            {[
+              { name: 'Free', price: '$0', reports: '3 reports / mo', highlight: 'Try it out', dark: false, pop: false },
+              { name: 'Starter', price: '$20', reports: '15 reports / mo', highlight: 'For occasional use', dark: false, pop: false },
+              { name: 'Pro', price: '$50', reports: '50 reports / mo', highlight: 'Most popular', dark: true, pop: true },
+              { name: 'Enterprise', price: 'Custom', reports: 'Volume + team access', highlight: 'Contact us', dark: false, pop: false },
+            ].map(({ name, price, reports, highlight, dark, pop }) => (
+              <div key={name} style={{
+                background: dark ? 'linear-gradient(160deg, #0f172a 0%, #1e3a5f 100%)' : 'white',
+                border: dark ? '1px solid rgba(59,130,246,0.35)' : '1px solid #e2e8f0',
+                padding: '28px 22px', textAlign: 'left', position: 'relative',
+                boxShadow: dark ? '0 8px 28px rgba(0,0,0,0.2)' : '0 2px 8px rgba(0,0,0,0.04)',
+              }}>
+                {pop && (
+                  <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg,#2563eb,#1d4ed8)', color: 'white', fontSize: 10, fontWeight: 700, padding: '3px 14px', letterSpacing: '0.6px', whiteSpace: 'nowrap' }}>MOST POPULAR</div>
+                )}
+                <div style={{ fontSize: 11, fontWeight: 700, color: dark ? '#60a5fa' : '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 8 }}>{name}</div>
+                <div style={{ fontSize: 34, fontWeight: 800, color: dark ? 'white' : '#0f172a', letterSpacing: '-1px', marginBottom: 4 }}>
+                  {price}{price !== 'Custom' && <span style={{ fontSize: 14, fontWeight: 500, color: dark ? '#94a3b8' : '#64748b' }}>/mo</span>}
+                </div>
+                <div style={{ fontSize: 13, color: dark ? '#60a5fa' : '#2563eb', fontWeight: 600, marginBottom: 6 }}>{reports}</div>
+                <div style={{ fontSize: 12, color: dark ? '#64748b' : '#94a3b8', marginBottom: 20 }}>{highlight}</div>
+                <Link to={name === 'Enterprise' ? '/contact' : '/signup'} className="btn-link" style={{
+                  display: 'block', textAlign: 'center', textDecoration: 'none',
+                  background: dark ? 'linear-gradient(135deg,#2563eb,#1d4ed8)' : 'transparent',
+                  border: dark ? 'none' : '1.5px solid #cbd5e1',
+                  color: dark ? 'white' : '#374151',
+                  padding: '9px 16px', fontSize: 13, fontWeight: 600,
+                  boxShadow: dark ? '0 4px 14px rgba(37,99,235,0.35)' : 'none',
+                }}>{name === 'Enterprise' ? 'Contact Us →' : name === 'Free' ? 'Get Started Free' : 'Start Free →'}</Link>
+              </div>
+            ))}
+          </div>
+          <Link to="/pricing" style={{ fontSize: 14, color: '#2563eb', textDecoration: 'none', fontWeight: 600 }}>
+            View full pricing details & FAQ →
+          </Link>
+        </div>
+      </section>
+
       {/* CTA */}
       <section style={{
         background: 'linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%)',

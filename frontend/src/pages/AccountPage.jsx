@@ -10,6 +10,9 @@ export default function AccountPage() {
   const [reports, setReports]     = useState([]);
   const [loading, setLoading]     = useState(true);
   const [expandedId, setExpandedId] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const [deleteError, setDeleteError] = useState('');
   const [logoLoading, setLogoLoading] = useState(false);
   const [logoError, setLogoError] = useState('');
   const [companyNameInput, setCompanyNameInput] = useState('');
@@ -85,6 +88,23 @@ export default function AccountPage() {
       setLogoError(err.message);
     } finally {
       setLogoLoading(false);
+    }
+  }
+
+  async function handleDeleteReport(id) {
+    setDeletingId(id);
+    setDeleteError('');
+    try {
+      const res = await authFetch(`/api/reports/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to delete report');
+      setReports(prev => prev.filter(r => r.id !== id));
+      if (expandedId === id) setExpandedId(null);
+    } catch (err) {
+      setDeleteError(err.message);
+    } finally {
+      setDeletingId(null);
+      setConfirmDeleteId(null);
     }
   }
 
@@ -271,6 +291,12 @@ export default function AccountPage() {
           </h2>
         </div>
 
+        {deleteError && (
+          <div style={{ marginBottom: 14, background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '10px 16px', fontSize: 13 }}>
+            {deleteError}
+          </div>
+        )}
+
         {reports.length === 0 ? (
           <div style={{ background: 'white', border: '1px solid #e2e8f0', padding: '64px 24px', textAlign: 'center' }}>
             <div style={{ fontSize: 44, marginBottom: 14 }}>📋</div>
@@ -316,25 +342,46 @@ export default function AccountPage() {
                           </div>
                         )}
                       </div>
-                      <button
-                        onClick={() => setExpandedId(prev => prev === entry.id ? null : entry.id)}
-                        style={{
-                          background: isExpanded ? '#1d4ed8' : 'white',
-                          border: '1px solid #e2e8f0',
-                          color: isExpanded ? 'white' : '#374151',
-                          padding: '8px 18px', fontSize: 13, fontWeight: 600,
-                          cursor: 'pointer', flexShrink: 0, transition: 'all 0.15s',
-                        }}
-                      >
-                        {isExpanded ? 'Hide Report ▲' : 'View Report ▼'}
-                      </button>
+                      <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'center' }}>
+                        {confirmDeleteId === entry.id ? (
+                          <>
+                            <span style={{ fontSize: 12, color: '#64748b', alignSelf: 'center' }}>Delete this report?</span>
+                            <button
+                              onClick={() => setConfirmDeleteId(null)}
+                              style={{ padding: '8px 14px', fontSize: 13, fontWeight: 600, background: 'white', border: '1px solid #e2e8f0', color: '#374151', cursor: 'pointer' }}
+                            >Cancel</button>
+                            <button
+                              onClick={() => handleDeleteReport(entry.id)}
+                              disabled={deletingId === entry.id}
+                              style={{ padding: '8px 14px', fontSize: 13, fontWeight: 600, background: '#dc2626', border: 'none', color: 'white', cursor: 'pointer' }}
+                            >{deletingId === entry.id ? 'Deleting…' : 'Delete'}</button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmDeleteId(entry.id)}
+                            style={{ padding: '8px 12px', fontSize: 13, fontWeight: 600, background: 'white', border: '1px solid #fca5a5', color: '#b91c1c', cursor: 'pointer' }}
+                          >Delete</button>
+                        )}
+                        <button
+                          onClick={() => setExpandedId(prev => prev === entry.id ? null : entry.id)}
+                          style={{
+                            background: isExpanded ? '#1d4ed8' : 'white',
+                            border: '1px solid #e2e8f0',
+                            color: isExpanded ? 'white' : '#374151',
+                            padding: '8px 18px', fontSize: 13, fontWeight: 600,
+                            cursor: 'pointer', transition: 'all 0.15s',
+                          }}
+                        >
+                          {isExpanded ? 'Hide Report ▲' : 'View Report ▼'}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
                   {isExpanded && (
                     <div style={{ borderTop: '1px solid #e2e8f0', padding: '0 22px 24px' }}>
                       <ReportDisplay
-                        report={{ ...r, ...pi, imagePreviews: [], companyName: user?.companyName || pi?.companyName || r?.companyName || '' }}
+                        report={{ ...r, ...pi, imagePreviews: entry.imagePreviews || [], companyName: user?.companyName || pi?.companyName || r?.companyName || '' }}
                         onReset={null}
                         companyLogo={user?.logo || null}
                       />

@@ -8,6 +8,7 @@ export default function MarketingNav() {
   const navLinks = [
     { to: '/', label: 'Home' },
     { to: '/features', label: 'Features' },
+    { to: '/pricing', label: 'Pricing' },
     { to: '/about', label: 'About' },
     { to: '/contact', label: 'Contact' },
   ];

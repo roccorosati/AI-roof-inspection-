@@ -72,6 +72,24 @@ export default function InspectionApp() {
     setStep(1);
   }
 
+  function compressImage(src, maxDim = 1200, quality = 0.7) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+        const w = Math.round(img.naturalWidth * scale);
+        const h = Math.round(img.naturalHeight * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => resolve(null);
+      img.src = src;
+    });
+  }
+
   async function handleAnalyze() {
     if (images.length === 0) return;
     setStep(2);
@@ -91,24 +109,25 @@ export default function InspectionApp() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Analysis failed');
 
-      const fullReport = {
-        ...data.report,
-        ...propertyInfo,
-        imagePreviews: images.map((i) => ({
-          src: i.preview, isVideoFrame: i.isVideoFrame || false,
-          videoName: i.videoName || null, name: i.name,
-        })),
-      };
+      const imagePreviews = images.map((i) => ({
+        src: i.preview, isVideoFrame: i.isVideoFrame || false,
+        videoName: i.videoName || null, name: i.name,
+      }));
 
-      setReport(fullReport);
+      setReport({ ...data.report, ...propertyInfo, imagePreviews });
       setStep(3);
 
-      // Save report to account in the background
-      authFetch('/api/reports', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ propertyInfo, report: data.report }),
-      }).catch(() => {}); // non-blocking, best-effort
+      // Compress images and save report in the background
+      Promise.all(images.map(i => compressImage(i.preview))).then(compressed => {
+        const storedPreviews = compressed
+          .map((src, idx) => src ? { src, name: images[idx].name, isVideoFrame: images[idx].isVideoFrame || false } : null)
+          .filter(Boolean);
+        return authFetch('/api/reports', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ propertyInfo, report: data.report, imagePreviews: storedPreviews }),
+        });
+      }).catch(() => {});
     } catch (err) {
       setError(err.message);
       setStep(1);

@@ -34,7 +34,7 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '50mb' }));
 app.use(express.static(PUBLIC_DIR));
 
 // ── Rate limiters ─────────────────────────────────────────────────────────────
@@ -170,7 +170,7 @@ app.get('/api/reports', requireAuth, async (req, res) => {
 
 app.post('/api/reports', requireAuth, async (req, res) => {
   try {
-    const { propertyInfo, report } = req.body;
+    const { propertyInfo, report, imagePreviews } = req.body;
     if (!report) return res.status(400).json({ error: 'Report data is required' });
     const db = await readReports();
     const entry = {
@@ -179,12 +179,26 @@ app.post('/api/reports', requireAuth, async (req, res) => {
       createdAt: new Date().toISOString(),
       propertyInfo: propertyInfo || {},
       report,
+      imagePreviews: imagePreviews || [],
     };
     db.reports.push(entry);
     await writeReports(db);
     res.status(201).json({ id: entry.id });
   } catch (err) {
     res.status(500).json({ error: 'Failed to save report' });
+  }
+});
+
+app.delete('/api/reports/:id', requireAuth, async (req, res) => {
+  try {
+    const db = await readReports();
+    const idx = db.reports.findIndex(r => r.id === req.params.id && r.userId === getUserId(req));
+    if (idx === -1) return res.status(404).json({ error: 'Report not found' });
+    db.reports.splice(idx, 1);
+    await writeReports(db);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete report' });
   }
 });
 
